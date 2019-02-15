@@ -5,14 +5,14 @@ const G: f64 = 6.67e-11;
 const TIMESTEP: f64 = 0.25;
 pub const NSTEPS: usize = 10;
 
-pub struct Body {
-  x: f64,
-  y: f64,
-  z: f64,
-  dx: f64,
-  dy: f64,
-  dz: f64,
-  mass: f64,
+pub struct BodyStates {
+  xs: Vec<f64>,
+  ys: Vec<f64>,
+  zs: Vec<f64>,
+  dxs: Vec<f64>,
+  dys: Vec<f64>,
+  dzs: Vec<f64>,
+  masses: Vec<f64>,
   /* x: f64,
   x: f64,
   x: f64,*/
@@ -26,16 +26,32 @@ fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
   (G * mass1 * mass2) / (distance * distance)
 }
 
-pub fn compute_forces<'a, I>(i: I, reference: &Vec<Body>) -> Vec<Body>
-where
-  I: rayon::iter::IntoParallelIterator<Item = &'a Body>,
+type Map = Vec<f64>;
+
+fn forces(bs: &BodyStates) -> (Map, Map, Map) {
+  let dxs = bs.xs.
+}
+
+fn accelerations(bs: &BodyStates) -> (Map, Map, Map) 
 {
-  i.into_par_iter()
+  let (fx, fy, fz) = ...;
+  (bs.masses.iter().zip(fx).map(
+    |(&m, &fx)| fx / m
+  ).collect(),
+  bs.masses.iter().zip(fy).map(
+    |(&m, &fx)| fx / m
+  ).collect(),
+  bs.masses.iter().zip(fz).map(
+    |(&m, &fx)| fx / m
+).collect(),
+)
+i.into_par_iter()
     .map(|b| {
       let mut fx: f64 = 0.0;
       let mut fy: f64 = 0.0;
       let mut fz: f64 = 0.0;
 
+// calculate forces over all other things
       for other in reference {
         let dx = b.x - other.x;
         let dy = b.y - other.y;
@@ -48,36 +64,39 @@ where
         fy += (f * dy) / d;
         fz += (f * dz) / d;
       }
-      let ax = fx / b.mass;
-      let ay = fy / b.mass;
-      let az = fz / b.mass;
-
-      Body {
-        x: b.x + (TIMESTEP * b.dx),
-        y: b.y + (TIMESTEP * b.dy),
-        z: b.z + (TIMESTEP * b.dz),
-        dx: b.dx + (TIMESTEP * ax),
-        dy: b.dy + (TIMESTEP * ay),
-        dz: b.dz + (TIMESTEP * az),
-        mass: b.mass,
-      }
-    })
-    .collect()
+    }
 }
 
-pub fn init() -> Vec<Body> {
-  (0..N)
-    .map(|i| {
-      let i = i as f64;
-      Body {
-        x: 100. * (i + 0.1),
-        y: 200. * (i + 0.1),
-        z: 300. * (i + 0.1),
-        dx: i + 400.0,
-        dy: i + 500.,
-        dz: i + 600.,
-        mass: 10e6 * (i + 100.2),
-      }
-    })
-    .collect()
+pub fn compute_forces(bs: BodyStates) -> BodyStates
+{
+  let (axs, ays, azs) = accelerations(&bs);
+    BodyStates {
+    xs: bs.xs.iter().zip(bs.dxs.iter()).map(
+      |(&x, &dx)| x + dx * TIMESTEP).collect(),
+    ys: bs.ys.iter().zip(bs.dys.iter()).map(
+      |(&x, &dx)| x + dx * TIMESTEP).collect(),
+    zs: bs.zs.iter().zip(bs.dzs.iter()).map(
+      |(&x, &dx)| x + dx * TIMESTEP).collect(),
+    dxs: bs.dxs.iter().zip(axs).map(
+      |(&dx, &ax)| dx + ax * TIMESTEP).collect(),
+    dys: bs.dys.iter().zip(ays).map(
+      |(&dx, &ax)| dx + ax * TIMESTEP).collect(),
+    dzs: bs.dzs.iter().zip(azs).map(
+      |(&dx, &ax)| dx + ax * TIMESTEP).collect(),
+    masses: bs.masses,
+  }
+}
+
+pub fn init<'a>() -> BodyStates {
+  let range: Vec<f64> = (0..N).map(|i| i as f64).collect();
+  let ret = BodyStates {
+    xs: range.iter().map(|i| 100. * (*i * 0.1)).collect(),
+    ys: range.iter().map(|i| 200. * (*i * 0.1)).collect(),
+    zs: range.iter().map(|i| 300. * (*i * 0.1)).collect(),
+    dxs: range.iter().map(|i| 400. + *i).collect(),
+    dys: range.iter().map(|i| 500. + *i).collect(),
+    dzs: range.iter().map(|i| 600. + *i).collect(),
+    masses: range.iter().map(|i| 10e6 * (*i + 100.2)).collect(),
+  };
+  ret
 }
