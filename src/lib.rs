@@ -105,14 +105,14 @@ pub fn compute_forces(bs: BodyStates) -> BodyStates {
   BodyStates {
     poss: bs
       .poss
-      .iter()
-      .zip(bs.vels.iter())
+      .par_iter()
+      .zip(bs.vels.par_iter())
       .map(|(p, v)| move_position(p, v))
       .collect(),
     vels: bs
       .vels
-      .iter()
-      .zip(accs.iter())
+      .par_iter()
+      .zip(accs.par_iter())
       .map(|(v, a)| update_velocity(v, a))
       .collect(),
     masses: bs.masses,
