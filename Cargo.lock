@@ -1,0 +1,4 @@
+[[package]]
+name = "rust-nbody"
+version = "0.1.0"
+
