@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 const N: usize = 10000;
 const G: f64 = 6.67e-11;
 const TIMESTEP: f64 = 0.25;
@@ -26,9 +28,9 @@ fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
 
 pub fn compute_forces<'a, I>(i: I, reference: &Vec<Body>) -> Vec<Body>
 where
-  I: IntoIterator<Item = &'a Body>,
+  I: rayon::iter::IntoParallelIterator<Item = &'a Body>,
 {
-  i.into_iter()
+  i.into_par_iter()
     .map(|b| {
       let mut fx: f64 = 0.0;
       let mut fy: f64 = 0.0;
