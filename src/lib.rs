@@ -37,16 +37,17 @@ fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
 
 fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
   bs.poss
-    .iter()
-    .zip(bs.masses.iter())
+    .par_iter()
+    .zip(bs.masses.par_iter())
     .map(|(ref p, &m)| {
       let mut fx: f64 = 0.0;
       let mut fy: f64 = 0.0;
       let mut fz: f64 = 0.0;
 
-      let reference = bs.poss.iter().zip(bs.masses.iter());
+      let reference = bs.poss.par_iter().zip(bs.masses.par_iter());
       // calculate forces over all other things
-      for (ref otherpos, &othermass) in reference {
+      reference.for_each(|(ref otherpos, &othermass)|
+      {
         let dx = p.x - otherpos.x;
         let dy = p.y - otherpos.y;
         let dz = p.z - otherpos.z;
@@ -57,7 +58,7 @@ fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
         fx += (f * dx) / d;
         fy += (f * dy) / d;
         fz += (f * dz) / d;
-      }
+      });
       Acceleration {
         ax: fx / m,
         ay: fy / m,
