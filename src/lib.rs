@@ -15,6 +15,11 @@ struct Velocity {
   dy: f64,
   dz: f64,
 }
+struct Force {
+  fx: f64,
+  fy: f64,
+  fz: f64,
+}
 struct Acceleration {
   ax: f64,
   ay: f64,
@@ -40,14 +45,9 @@ fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
     .par_iter()
     .zip(bs.masses.par_iter())
     .map(|(ref p, &m)| {
-      let mut fx: f64 = 0.0;
-      let mut fy: f64 = 0.0;
-      let mut fz: f64 = 0.0;
-
       let reference = bs.poss.par_iter().zip(bs.masses.par_iter());
       // calculate forces over all other things
-      reference.for_each(|(ref otherpos, &othermass)|
-      {
+      let forces = reference.map(|(ref otherpos, &othermass)| {
         let dx = p.x - otherpos.x;
         let dy = p.y - otherpos.y;
         let dz = p.z - otherpos.z;
@@ -55,10 +55,24 @@ fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
         let d = dist(dx, dy, dz);
         let f = force(m, othermass, d);
 
-        fx += (f * dx) / d;
-        fy += (f * dy) / d;
-        fz += (f * dz) / d;
+        Force {
+          fx: (f * dx) / d,
+          fy: (f * dy) / d,
+          fz: (f * dz) / d,
+        }
       });
+      let Force { fx, fy, fz } = forces.reduce(
+        || Force {
+          fx: 0.,
+          fy: 0.,
+          fz: 0.,
+        },
+        |acc: Force, f: Force| Force {
+          fx: acc.fx + f.fx,
+          fy: acc.fy + f.fy,
+          fz: acc.fz + f.fz,
+        },
+      );
       Acceleration {
         ax: fx / m,
         ay: fy / m,
