@@ -14,7 +14,7 @@ fn main() {
     );
     let start_time = Instant::now();
     for ts in 0..rust_nbody::NSTEPS {
-        current = rust_nbody::compute_forces(&current, &current);
+        current = rust_nbody::compute_forces(current);
         println!(
             "timestep {} complete: {}",
             ts,
