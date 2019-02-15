@@ -36,7 +36,7 @@ where
       let mut fy: f64 = 0.0;
       let mut fz: f64 = 0.0;
 
-      for other in reference {
+      reference.par_iter().for_each(|other| {
         let dx = b.x - other.x;
         let dy = b.y - other.y;
         let dz = b.z - other.z;
@@ -47,7 +47,7 @@ where
         fx += (f * dx) / d;
         fy += (f * dy) / d;
         fz += (f * dz) / d;
-      }
+      });
       let ax = fx / b.mass;
       let ay = fy / b.mass;
       let az = fz / b.mass;
@@ -65,6 +65,7 @@ where
     .collect()
 }
 
+// better to keep this sequential
 pub fn init() -> Vec<Body> {
   (0..N)
     .map(|i| {
