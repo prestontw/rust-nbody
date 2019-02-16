@@ -100,6 +100,7 @@ fn update_velocity(v: &Velocity, a: &Acceleration) -> Velocity {
   }
 }
 
+// slight slowdown from making not parallel
 pub fn compute_forces(bs: BodyStates) -> BodyStates {
   let accs = accelerations(&bs);
   BodyStates {
