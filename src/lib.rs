@@ -40,39 +40,49 @@ fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
   (G * mass1 * mass2) / (distance * distance)
 }
 
+fn forces_for_body<'a, I>(p: &Position, m: f64, reference: I) -> Force
+where
+  I: rayon::iter::IntoParallelIterator<Item = (&'a Position, &'a f64)>,
+{
+  reference
+    .into_par_iter()
+    .map(|(ref otherpos, &othermass)| {
+      let dx = p.x - otherpos.x;
+      let dy = p.y - otherpos.y;
+      let dz = p.z - otherpos.z;
+
+      let d = dist(dx, dy, dz);
+      let f = force(m, othermass, d);
+
+      Force {
+        fx: (f * dx) / d,
+        fy: (f * dy) / d,
+        fz: (f * dz) / d,
+      }
+    })
+    .reduce(
+      || Force {
+        fx: 0.,
+        fy: 0.,
+        fz: 0.,
+      },
+      |acc: Force, f: Force| Force {
+        fx: acc.fx + f.fx,
+        fy: acc.fy + f.fy,
+        fz: acc.fz + f.fz,
+      },
+    )
+}
+
 fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
   bs.poss
     .par_iter()
     .zip(bs.masses.par_iter())
     .map(|(ref p, &m)| {
       let reference = bs.poss.par_iter().zip(bs.masses.par_iter());
+
       // calculate forces over all other things
-      let forces = reference.map(|(ref otherpos, &othermass)| {
-        let dx = p.x - otherpos.x;
-        let dy = p.y - otherpos.y;
-        let dz = p.z - otherpos.z;
-
-        let d = dist(dx, dy, dz);
-        let f = force(m, othermass, d);
-
-        Force {
-          fx: (f * dx) / d,
-          fy: (f * dy) / d,
-          fz: (f * dz) / d,
-        }
-      });
-      let Force { fx, fy, fz } = forces.reduce(
-        || Force {
-          fx: 0.,
-          fy: 0.,
-          fz: 0.,
-        },
-        |acc: Force, f: Force| Force {
-          fx: acc.fx + f.fx,
-          fy: acc.fy + f.fy,
-          fz: acc.fz + f.fz,
-        },
-      );
+      let Force { fx, fy, fz } = forces_for_body(p, m, reference);
       Acceleration {
         ax: fx / m,
         ay: fy / m,
