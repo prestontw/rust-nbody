@@ -1,5 +1,5 @@
 //! Implementing the N-body program in Rust (with a little bit of EC(S) thrown in).
-//!
+//! 
 //! This is almost a direct translation from an assignment in a Parallel Systems
 //! course I took algorithm-wise.
 //! The interesting part of that assignment is that we had to use UPC—the
@@ -42,7 +42,7 @@ struct Acceleration {
 /// a position vector,
 /// a velocities vector,
 /// and a mass vector.
-///
+/// 
 /// Originally, this was implemented as an array of structures—now
 /// it's a structure of arrays.
 /// This was both for testing optimizations and for minute practice with EC(S).
@@ -138,22 +138,23 @@ fn update_velocity(v: &Velocity, a: &Acceleration) -> Velocity {
 }
 
 /// Computes the next `BodyStates`.
-pub fn compute_forces(mut bs: BodyStates) -> BodyStates {
+pub fn compute_forces(bs: BodyStates) -> BodyStates {
   let accs = accelerations(&bs);
-  bs.poss = bs
-    .poss
-    .par_iter()
-    .zip(bs.vels.par_iter())
-    .map(|(p, v)| move_position(p, v))
-    .collect();
-  bs.vels = bs
-    .vels
-    .par_iter()
-    .zip(accs.par_iter())
-    .map(|(v, a)| update_velocity(v, a))
-    .collect();
-  bs.masses = bs.masses;
-  bs
+  BodyStates {
+    poss: bs
+      .poss
+      .par_iter()
+      .zip(bs.vels.par_iter())
+      .map(|(p, v)| move_position(p, v))
+      .collect(),
+    vels: bs
+      .vels
+      .par_iter()
+      .zip(accs.par_iter())
+      .map(|(v, a)| update_velocity(v, a))
+      .collect(),
+    masses: bs.masses,
+  }
 }
 
 /// Simple function to create a lot of bodies.
