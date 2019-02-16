@@ -83,41 +83,32 @@ fn accelerations(bs: &BodyStates) -> Vec<Acceleration> {
 }
 
 // maybe make this update the position?
-fn move_position(p: &Position, v: &Velocity) -> Position {
-  Position {
-    x: p.x + v.dx * TIMESTEP,
-    y: p.y + v.dy * TIMESTEP,
-    z: p.z + v.dz * TIMESTEP,
-  }
+fn move_position(p: &mut Position, v: &Velocity) {
+  p.x += v.dx * TIMESTEP;
+  p.y += v.dy * TIMESTEP;
+  p.z += v.dz * TIMESTEP;
 }
 
 // maybe make this statefully update vel?
-fn update_velocity(v: &Velocity, a: &Acceleration) -> Velocity {
-  Velocity {
-    dx: v.dx + a.ax * TIMESTEP,
-    dy: v.dy + a.ay * TIMESTEP,
-    dz: v.dz + a.az * TIMESTEP,
-  }
+fn update_velocity(v: &mut Velocity, a: &Acceleration) {
+  v.dx += a.ax * TIMESTEP;
+  v.dy += a.ay * TIMESTEP;
+  v.dz += a.az * TIMESTEP;
 }
 
 // slight slowdown from making not parallel
-pub fn compute_forces(bs: BodyStates) -> BodyStates {
+pub fn compute_forces(mut bs: BodyStates) -> BodyStates {
   let accs = accelerations(&bs);
-  BodyStates {
-    poss: bs
-      .poss
-      .par_iter()
-      .zip(bs.vels.par_iter())
-      .map(|(p, v)| move_position(p, v))
-      .collect(),
-    vels: bs
-      .vels
-      .par_iter()
-      .zip(accs.par_iter())
-      .map(|(v, a)| update_velocity(v, a))
-      .collect(),
-    masses: bs.masses,
-  }
+  bs.poss
+    .par_iter_mut()
+    .zip(bs.vels.par_iter())
+    .for_each(|(p, v)| move_position(p, v));
+  bs.vels
+    .par_iter_mut()
+    .zip(accs.par_iter())
+    .for_each(|(v, a)| update_velocity(v, a));
+
+  bs
 }
 
 pub fn init<'a>() -> BodyStates {
