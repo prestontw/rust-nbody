@@ -32,25 +32,25 @@ where
 {
   i.into_par_iter()
     .map(|b| {
-      let mut fx: f64 = 0.0;
-      let mut fy: f64 = 0.0;
-      let mut fz: f64 = 0.0;
+      let forces = reference
+        .par_iter()
+        .map(|other| {
+          let dx = b.x - other.x;
+          let dy = b.y - other.y;
+          let dz = b.z - other.z;
 
-      reference.par_iter().for_each(|other| {
-        let dx = b.x - other.x;
-        let dy = b.y - other.y;
-        let dz = b.z - other.z;
+          let d = dist(dx, dy, dz);
+          let f = force(b.mass, other.mass, d);
 
-        let d = dist(dx, dy, dz);
-        let f = force(b.mass, other.mass, d);
-
-        fx += (f * dx) / d;
-        fy += (f * dy) / d;
-        fz += (f * dz) / d;
-      });
-      let ax = fx / b.mass;
-      let ay = fy / b.mass;
-      let az = fz / b.mass;
+          ((f * dx) / d, (f * dy) / d, (f * dz) / d)
+        })
+        .reduce(
+          || (0., 0., 0.),
+          |acc, f| (acc.0 + f.0, acc.1 + f.1, acc.2 + f.2),
+        );
+      let ax = forces.0 / b.mass;
+      let ay = forces.1 / b.mass;
+      let az = forces.2 / b.mass;
 
       Body {
         x: b.x + (TIMESTEP * b.dx),
