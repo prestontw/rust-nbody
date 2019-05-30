@@ -10,31 +10,33 @@
 
 use rayon::prelude::*;
 
+type Number = f64;
+
 const N: usize = 10000;
-const G: f64 = 6.67e-11;
-const TIMESTEP: f64 = 0.25;
+const G: Number = 6.67e-11;
+const TIMESTEP: Number = 0.25;
 /// The number of steps to simulate.
 pub const NSTEPS: usize = 10;
 
 struct Position {
-  x: f64,
-  y: f64,
-  z: f64,
+  x: Number,
+  y: Number,
+  z: Number,
 }
 struct Velocity {
-  dx: f64,
-  dy: f64,
-  dz: f64,
+  dx: Number,
+  dy: Number,
+  dz: Number,
 }
 struct Force {
-  fx: f64,
-  fy: f64,
-  fz: f64,
+  fx: Number,
+  fy: Number,
+  fz: Number,
 }
 struct Acceleration {
-  ax: f64,
-  ay: f64,
-  az: f64,
+  ax: Number,
+  ay: Number,
+  az: Number,
 }
 
 /// The main structure of this program.
@@ -49,34 +51,34 @@ struct Acceleration {
 pub struct BodyStates {
   poss: Vec<Position>,
   vels: Vec<Velocity>,
-  masses: Vec<f64>,
+  masses: Vec<Number>,
 }
 
 /// Given a point from the origin as `f64`'s,
 /// calculate its distance from the origin.
-fn dist(dx: f64, dy: f64, dz: f64) -> f64 {
+fn dist(dx: Number, dy: Number, dz: Number) -> Number {
   dist_squared(dx, dy, dz).sqrt()
 }
 
-fn dist_squared(dx: f64, dy: f64, dz: f64) -> f64 {
+fn dist_squared(dx: Number, dy: Number, dz: Number) -> Number {
   ((dx * dx) + (dy * dy) + (dz * dz))
 }
 
 /// Given the masses of two bodies and the distance between them,
 /// calculate the force between them.
-fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
+fn force(mass1: Number, mass2: Number, distance: Number) -> Number {
   force_d(mass1, mass2, distance * distance)
 }
 
-fn force_d(mass1: f64, mass2: f64, distance_squared: f64) -> f64 {
+fn force_d(mass1: Number, mass2: Number, distance_squared: Number) -> Number {
   (G * mass1 * mass2) / distance_squared
 }
 
 /// Given the position and mass of one body,
 /// calculate the force acting on it from all of the other bodies.
-fn forces_for_body<'a, I>(p: &Position, m: f64, reference: I) -> Force
+fn forces_for_body<'a, I>(p: &Position, m: Number, reference: I) -> Force
 where
-  I: rayon::iter::IntoParallelIterator<Item = (&'a Position, &'a f64)>,
+  I: rayon::iter::IntoParallelIterator<Item = (&'a Position, &'a Number)>,
 {
   reference
     .into_par_iter()
@@ -168,7 +170,7 @@ pub fn compute_forces(bs: BodyStates) -> BodyStates {
 /// Simple function to create a lot of bodies.
 /// Thank you, Larkins, for letting me use these umbers.
 pub fn init<'a>() -> BodyStates {
-  let range: Vec<f64> = (0..N).map(|i| i as f64).collect();
+  let range: Vec<Number> = (0..N).map(|i| i as Number).collect();
   let ret = BodyStates {
     poss: range
       .iter()
