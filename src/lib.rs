@@ -55,13 +55,21 @@ pub struct BodyStates {
 /// Given a point from the origin as `f64`'s,
 /// calculate its distance from the origin.
 fn dist(dx: f64, dy: f64, dz: f64) -> f64 {
-  ((dx * dx) + (dy * dy) + (dz * dz)).sqrt()
+  dist_squared(dx, dy, dz).sqrt()
+}
+
+fn dist_squared(dx: f64, dy: f64, dz: f64) -> f64 {
+  ((dx * dx) + (dy * dy) + (dz * dz))
 }
 
 /// Given the masses of two bodies and the distance between them,
 /// calculate the force between them.
 fn force(mass1: f64, mass2: f64, distance: f64) -> f64 {
-  (G * mass1 * mass2) / (distance * distance)
+  force_d(mass1, mass2, distance * distance)
+}
+
+fn force_d(mass1: f64, mass2: f64, distance_squared: f64) -> f64 {
+  (G * mass1 * mass2) / distance_squared
 }
 
 /// Given the position and mass of one body,
@@ -77,8 +85,8 @@ where
       let dy = p.y - otherpos.y;
       let dz = p.z - otherpos.z;
 
-      let d = dist(dx, dy, dz);
-      let f = force(m, othermass, d);
+      let d = dist_squared(dx, dy, dz);
+      let f = force_d(m, othermass, d);
 
       Force {
         fx: (f * dx) / d,
