@@ -15,3 +15,7 @@ Benchmark: clone and run `cargo bench`. On my desktop computer with an AMD Ryzen
 run simulation          time:   [147.24 ms 147.54 ms 147.87 ms]
 ```
 which is slightly better (2%) than the `update` branch.
+
+## TODO
+maybe check out leapfrog finite difference approximation scheme
+-> ran into this question while trying to specify data flow
