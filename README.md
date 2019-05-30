@@ -12,7 +12,7 @@ Documentation: clone and run `cargo doc`
 
 Benchmark: clone and run `cargo bench`. On my desktop computer with an AMD Ryzen 5 2400g processor, the result is:
 ```
-run simulation          time:   [147.24 ms 147.54 ms 147.87 ms]
+run simulation          time:   [95.662 ms 96.389 ms 97.223 ms]
 ```
 which is slightly better (2%) than the `update` branch.
 
