@@ -16,6 +16,19 @@ run simulation          time:   [95.662 ms 96.389 ms 97.223 ms]
 ```
 which is slightly better (2%) than the `update` branch.
 
+## Using Docker
+### Building the image
+```
+docker build --rm -f "Dockerfile" -t rust-nbody:latest .
+```
+
+### Entering the shell
+Useful for compilation, benchmarking, etc., rather than doing everything from Dockerfile `CMD`.
+
+```
+docker run -it --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/opt/src rust-nbody:latest /bin/bash
+```
+
 ## TODO
 maybe check out leapfrog finite difference approximation scheme
 -> ran into this question while trying to specify data flow
