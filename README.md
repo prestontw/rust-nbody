@@ -19,7 +19,6 @@ Benchmark: clone and run `cargo bench`.
 | AMD Ryzen 5 2400g/Fedora Linux | [95.662 ms 96.389 ms 97.223 ms] |
 
 The master branch has slightly better performance (2%) than the `update` branch.
-(Docker is about 7--10% slower than native.)
 
 ## Using Docker
 ### Building the image
