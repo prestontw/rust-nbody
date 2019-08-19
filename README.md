@@ -10,11 +10,16 @@ interesting parts of this implementation are:
 
 Documentation: clone and run `cargo doc`
 
-Benchmark: clone and run `cargo bench`. On my desktop computer with an AMD Ryzen 5 2400g processor, the result is:
-```
-run simulation          time:   [95.662 ms 96.389 ms 97.223 ms]
-```
-which is slightly better (2%) than the `update` branch.
+Benchmark: clone and run `cargo bench`.
+
+| Processor/System | Output |
+| ---------------- | ------ |
+| 2.9 GHz Intel Core i9/MacOS | [72.774 ms 73.207 ms 73.692 ms] |
+| 2.9 GHz Intel Core i9/MacOS (`rust` Docker) | [75.678 ms 76.128 ms 76.629 ms] |
+| AMD Ryzen 5 2400g/Fedora Linux | [95.662 ms 96.389 ms 97.223 ms] |
+
+The master branch has slightly better performance (2%) than the `update` branch.
+(Docker is about 7--10% slower than native.)
 
 ## Using Docker
 ### Building the image
