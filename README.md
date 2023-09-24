@@ -15,6 +15,7 @@ Benchmark: clone and run `cargo bench`.
 
 | Processor/System                            | Output                          |
 | ------------------------------------------- | ------------------------------- |
+| AMD Ryzen 9 5900X/Kubuntu 22.04             | [34.783 ms 34.842 ms 34.900 ms] |
 | m1 macbook pro                              | [35.329 ms 35.627 ms 35.939 ms] |
 | 2.9 GHz Intel Core i9/MacOS                 | [72.774 ms 73.207 ms 73.692 ms] |
 | 2.9 GHz Intel Core i9/MacOS (`rust` Docker) | [75.678 ms 76.128 ms 76.629 ms] |
